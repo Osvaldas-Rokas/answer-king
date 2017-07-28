@@ -1,35 +1,64 @@
 package answer.king.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 import java.math.BigDecimal;
 
+@Entity
+@Table(name = "T_RECEIPT")
 public class Receipt {
 
-	private BigDecimal payment;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-	private Order order;
+    private BigDecimal payment;
 
-	public Order getOrder() {
-		return order;
-	}
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ORDER_ID")
+    private Order order;
 
-	public void setOrder(Order order) {
-		this.order = order;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public BigDecimal getPayment() {
-		return payment;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setPayment(BigDecimal payment) {
-		this.payment = payment;
-	}
+    public Order getOrder() {
+        return order;
+    }
 
-	public BigDecimal getChange() {
-		BigDecimal totalOrderPrice = order.getItems()
-			.stream()
-			.map(Item::getPrice)
-			.reduce(BigDecimal.ZERO, BigDecimal::add);
+    public void setOrder(Order order) {
+        this.order = order;
+    }
 
-		return payment.subtract(totalOrderPrice);
-	}
+    public BigDecimal getPayment() {
+        return payment;
+    }
+
+    public void setPayment(BigDecimal payment) {
+        this.payment = payment;
+    }
+
+    public BigDecimal getTotalOrderPrice() {
+        return order.getLineItems()
+                .stream()
+                .map(LineItem::getCurrentPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal getChange() {
+        return payment.subtract(getTotalOrderPrice());
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Receipt[id=%d, payment='%s', order='%s']",
+                id, payment, order);
+    }
 }
