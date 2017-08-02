@@ -6,16 +6,17 @@ import answer.king.model.LineItem;
 import answer.king.model.Order;
 import answer.king.model.Receipt;
 import answer.king.repo.ItemRepository;
+import answer.king.repo.LineItemRepository;
 import answer.king.repo.OrderRepository;
 import answer.king.repo.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Transactional
@@ -26,6 +27,9 @@ public class OrderService {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private LineItemRepository lineItemRepository;
 
     @Autowired
     private ReceiptRepository receiptRepository;
@@ -42,7 +46,12 @@ public class OrderService {
         Order order = orderRepository.findOne(id);
         Item item = itemRepository.findOne(itemId);
 
-        LineItem lineItemFound = order.getLineItems().stream().filter(y -> Objects.equals(y.getItem().getId(), itemId)).findAny().orElse(null);
+        LineItem lineItemExample = new LineItem();
+        lineItemExample.setOrder(order);
+        lineItemExample.setItem(item);
+
+        LineItem lineItemFound = lineItemRepository.findOne(Example.of(lineItemExample));
+
         if (lineItemFound != null) {
             Integer indexOfLineItem = order.getLineItems().indexOf(lineItemFound);
             Integer quantityBefore = lineItemFound.getQuantity();

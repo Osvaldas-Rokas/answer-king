@@ -34,13 +34,11 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
 public class ItemTest {
+    private static final String TEST_VALUE_ITEM1_NAME = "TestOswaldItem11111";
     private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
             Charset.forName("utf8"));
-
     private MockMvc mockMvc;
-    private static final String TEST_VALUE_ITEM1_NAME = "TestOswaldItem11111";
-
     private HttpMessageConverter mappingJackson2HttpMessageConverter;
 
     private Item item;
@@ -122,7 +120,7 @@ public class ItemTest {
     public void testShouldThrowBadRequestWhenCreatingItemAndPriceIsInvalid() throws Exception {
         Item item1 = new Item();
         item1.setName("AnyAnyAnyRandomName98532");
-        item1.setPrice(new BigDecimal("0"));
+        item1.setPrice(new BigDecimal("-1"));
 
         String itemJson = this.json(item1);
 
